@@ -20,9 +20,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // Se usuário encontrado, redireciona para a página principal ou dashboard
-            header('Location: dashboard.php');
-            exit;
+            // Se usuário encontrado, consultar a tabela cadPessoas para verificar o tipoUsuario
+            $idLogin = $user['idLogin'];  // Captura o idLogin do usuário encontrado
+
+            // Buscar o tipoUsuario na tabela cadPessoas
+            $stmtTipoUsuario = $pdo->prepare("SELECT tipoUsuario FROM cadPessoas WHERE idLogin = :idLogin");
+            $stmtTipoUsuario->execute(['idLogin' => $idLogin]);
+            $pessoa = $stmtTipoUsuario->fetch(PDO::FETCH_ASSOC);
+
+            if ($pessoa) {
+                // Verificar o tipoUsuario e redirecionar para a página apropriada
+                if ($pessoa['tipoUsuario'] == 3) {
+                    // Se tipoUsuario for 3, redireciona para a página do cliente
+                    header('Location: dashCliente.php');
+                    exit;
+                } elseif ($pessoa['tipoUsuario'] == 1 || $pessoa['tipoUsuario'] == 2) {
+                    // Se tipoUsuario for 1 ou 2, redireciona para a página da oficina
+                    header('Location: dashOficina.php');
+                    exit;
+                }
+            } else {
+                echo "<p>Erro: Usuário não encontrado na tabela cadPessoas.</p>";
+                exit;
+            }
         } else {
             // Se não encontrar o usuário, ativa a flag de erro
             $loginError = true;
