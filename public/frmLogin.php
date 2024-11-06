@@ -5,6 +5,9 @@ include_once '../includes/header.php';
 // Conectar ao banco de dados
 include_once '../assets/db/conexao.php';
 
+// Incluir funções
+include_once '../includes/functions.php';
+
 // Variáveis para controle da mensagem de erro
 $loginError = false; // Flag de erro para login
 
@@ -14,42 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
 
     // Consultar no banco se o usuário e a senha existem
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM logins WHERE usuario = :username AND senha = :password");
-        $stmt->execute(['username' => $username, 'password' => md5($password)]);  // Utilizando md5 (ou considere usar password_hash na produção)
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = verificarLogin($pdo, $username, $password);
 
-        if ($user) {
-            // Se usuário encontrado, consultar a tabela cadPessoas para verificar o tipoUsuario
-            $idLogin = $user['idLogin'];  // Captura o idLogin do usuário encontrado
+    if ($user) {
+        // Se o usuário for encontrado, verifica o tipo de usuário
+        $idLogin = $user['idLogin'];
+        $pessoa = obterTipoUsuario($pdo, $idLogin);
 
-            // Buscar o tipoUsuario na tabela cadPessoas
-            $stmtTipoUsuario = $pdo->prepare("SELECT tipoUsuario FROM cadPessoas WHERE idLogin = :idLogin");
-            $stmtTipoUsuario->execute(['idLogin' => $idLogin]);
-            $pessoa = $stmtTipoUsuario->fetch(PDO::FETCH_ASSOC);
-
-            if ($pessoa) {
-                // Verificar o tipoUsuario e redirecionar para a página apropriada
-                if ($pessoa['tipoUsuario'] == 3) {
-                    // Se tipoUsuario for 3, redireciona para a página do cliente
-                    header('Location: dashCliente.php');
-                    exit;
-                } elseif ($pessoa['tipoUsuario'] == 1 || $pessoa['tipoUsuario'] == 2) {
-                    // Se tipoUsuario for 1 ou 2, redireciona para a página da oficina
-                    header('Location: dashOficina.php');
-                    exit;
-                }
-            } else {
-                echo "<p>Erro: Usuário não encontrado na tabela cadPessoas.</p>";
-                exit;
-            }
+        if ($pessoa) {
+            // Redireciona com base no tipo de usuário
+            redirecionarTipoUsuario($pessoa['tipoUsuario']);
         } else {
-            // Se não encontrar o usuário, ativa a flag de erro
-            $loginError = true;
+            echo "<p>Erro: Usuário não encontrado na tabela cadPessoas.</p>";
+            exit;
         }
-    } catch (PDOException $e) {
-        echo "Erro ao verificar login: " . $e->getMessage();
-        exit;
+    } else {
+        // Se não encontrar o usuário, ativa a flag de erro
+        $loginError = true;
     }
 }
 ?>
