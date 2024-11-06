@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Mensagem de sucesso
         echo "<p>Cadastro de Pessoa Jurídica realizado com sucesso! Você será redirecionado para a página inicial.</p>";
-        echo "<a href='index.php'>Voltar para a página inicial</a>";
+        echo "<a href='../index.php'>Voltar para a página inicial</a>";
 
     } catch (PDOException $e) {
         // Em caso de erro, desfazemos a transação
