@@ -8,10 +8,10 @@ $banco = "mazzoline";       // nome do banco de dados
 try {
     // Criando a conexão usando PDO
     $dsn = "mysql:host=$servidor;dbname=$banco;charset=utf8"; // DSN (Data Source Name)
-    $conn = new PDO($dsn, $usuario, $senha);
+    $pdo = new PDO($dsn, $usuario, $senha);
 
     // Configurando o PDO para lançar exceções em caso de erro
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Caso a conexão seja bem-sucedida
     // echo "Conexão bem-sucedida!";
@@ -22,5 +22,5 @@ try {
 }
 
 // Retornando a conexão para ser utilizada em outros arquivos
-return $conn;
+return $pdo;
 ?>
